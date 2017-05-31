@@ -38,11 +38,9 @@ def rock_thresh(img):
     # Create an array of zeros same xy size as img, but single channel
     color_select = np.zeros_like(img[:,:,0])
 
-    # 0.45, 0.3, 0
-    threshold_low = (20, 100, 100)
+    threshold_low = (100, 100, 20)
+    threshold_high = (255, 255, 30)
 
-    # 0.65, 0.55, 0.15
-    threshold_high = (30, 255, 255)
     thresh = (img[:,:,0] > threshold_low[0]) & (img[:,:,0] < threshold_high[0])  \
                 & (img[:,:,1] > threshold_low[1]) & (img[:,:,1] < threshold_high[1]) \
                 & (img[:,:,2] > threshold_low[2]) & (img[:,:,2] < threshold_high[2])
@@ -52,6 +50,7 @@ def rock_thresh(img):
 
     # Return the binary image
     return color_select
+
 
 # Define a function to convert to rover-centric coordinates
 def rover_coords(binary_img):
