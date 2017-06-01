@@ -11,38 +11,39 @@ def decision_step(Rover):
 
     # Check if there are rocks
     if Rover.rocks_angles is not None and len(Rover.rocks_angles) > 0:
-        distance = np.mean(Rover.rocks_dists)
-        Rover.steer = np.clip(np.mean(Rover.rocks_angles * 180/np.pi), -15, 15)
-        # Move towards the rock slowly
-        if distance > 10:
+        print("Rock Collecting Mode")
+        # distance = np.mean(Rover.rocks_dists)
+        Rover.steer = np.clip(np.mean(Rover.rocks_angles * 180/np.pi), -15, 15) 
+        # Move towards the rock slowly
+        if not Rover.near_sample:
             if Rover.vel < Rover.max_vel/2:
+                Rover.brake = 0
                 Rover.throttle = 0.1
             else:
                 Rover.throttle = 0
-        # Stop when close to a rock.
+                Rover.brake = 1
+        # Stop when close to a rock.
         else:
             Rover.throttle = 0
             Rover.brake = Rover.brake_set
 
-        # After collecting the rock, we want to act as if stopped:
-        Rover.mode = 'Stop'
 
     # If there is terrain to move
     elif Rover.nav_angles is not None:
         # Check for Rover.mode status
         if Rover.mode == 'forward': 
+            print('FORWARD MODE')
             # Check the extent of navigable terrain
             if len(Rover.nav_angles) >= Rover.stop_forward:  
                 # If mode is forward, navigable terrain looks good 
                 # and velocity is below max, then throttle 
                 # Handle when it gets stuck with small obstacles
                 if Rover.vel < 0.01 and Rover.throttle != 0:
-                    Rover.mode = 'stuck'
                     Rover.brake = 0
+                    Rover.mode = 'stuck'
                 elif Rover.vel < Rover.max_vel:
                     # Set throttle value to throttle setting
                     Rover.throttle = Rover.throttle_set
-                    Rover.brake = 0
                     Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi), -15, 15)
 
                 else: # Else coast
@@ -63,6 +64,7 @@ def decision_step(Rover):
 
         # If we're already in "stop" mode then make different decisions
         elif Rover.mode == 'stop':
+            print('STOP MODE')
             # If we're in stop mode but still moving keep braking
             if Rover.vel > 0.2:
                 Rover.throttle = 0
@@ -88,21 +90,23 @@ def decision_step(Rover):
                     Rover.mode = 'forward'
 
         elif Rover.mode == 'stuck':
-            print("Car is stuck somewhere (or just starting")
+            print("Car is stuck somewhere")
+            Rover.brake = 0
             Rover.throttle = 0
             Rover.steer = -15 # Could be more clever here about which way to turn
             Rover.mode = 'forward'
-
-
     # Just to make the rover do something 
     # even if no modifications have been made to the code
     else:
+        print('NOTHING HAPPENED')
         Rover.throttle = Rover.throttle_set
-        Rover.steer = 0
+        Rover.steer = -15
         Rover.brake = 0
 
     if Rover.near_sample and Rover.vel == 0 and not Rover.picking_up:
         Rover.send_pickup = True
+        # After collecting the rock, we want to act as if stopped:
+        Rover.mode = 'stop'
 
     return Rover
 

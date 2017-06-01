@@ -25,8 +25,8 @@ def obstacle_thresh(img, rgb_thresh=(160, 160, 160)):
     color_select = np.zeros_like(img[:,:,0])
 
     thresh = (img[:,:,0] < rgb_thresh[0]) \
-                    | (img[:,:,1] < rgb_thresh[1]) \
-                    | (img[:,:,2] < rgb_thresh[2])
+                    & (img[:,:,1] < rgb_thresh[1]) \
+                    & (img[:,:,2] < rgb_thresh[2])
 
     # Index the array of zeros with the boolean array and set to 1
     color_select[thresh] = 1
@@ -157,7 +157,7 @@ def perception_step(Rover):
     pos = Rover.pos
     yaw = Rover.yaw
     world_size = Rover.worldmap.shape[0]
-    scale = 10
+    scale = 30
 
     xpix_terrain_world, ypix_terrain_world = pix_to_world(xpix_terrain, ypix_terrain, pos[0], pos[1], yaw, world_size, scale)
     xpix_obstacle_world, ypix_obstacle_world = pix_to_world(xpix_obstacle, ypix_obstacle, pos[0], pos[1], yaw, world_size, scale)
@@ -167,8 +167,8 @@ def perception_step(Rover):
         # Example: Rover.worldmap[obstacle_y_world, obstacle_x_world, 0] += 1
         #          Rover.worldmap[rock_y_world, rock_x_world, 1] += 1
         #          Rover.worldmap[navigable_y_world, navigable_x_world, 2] += 1
-    if Rover.roll < 0.5 or Rover.roll > 365.5:
-        if Rover.pitch < 0.5 or Rover.pitch > 365.5:
+    if Rover.roll < 2.0 or Rover.roll > 358:
+        if Rover.pitch < 2.0 or Rover.pitch > 358:
             Rover.worldmap[ypix_obstacle_world, xpix_obstacle_world, 0] += 255
             Rover.worldmap[ypix_rocks_world, xpix_rocks_world , 1] += 255
             Rover.worldmap[ypix_terrain_world, xpix_terrain_world, 2] += 255
