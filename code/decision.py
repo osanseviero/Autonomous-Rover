@@ -44,7 +44,7 @@ def decision_step(Rover):
                 elif Rover.vel < Rover.max_vel:
                     # Set throttle value to throttle setting
                     Rover.throttle = Rover.throttle_set
-                    Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi), -15, 15)
+                    Rover.steer = np.clip(np.mean(Rover.nav_angles * 180/np.pi), -10, 10)
 
                 else: # Else coast
                     Rover.throttle = 0
