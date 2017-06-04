@@ -12,6 +12,7 @@ def decision_step(Rover):
     # Check if there are rocks
     if Rover.rocks_angles is not None and len(Rover.rocks_angles) > 0:
         print("Rock Collecting Mode")
+        Rover.mode = 'forward'
         # distance = np.mean(Rover.rocks_dists)
         Rover.steer = np.clip(np.mean(Rover.rocks_angles * 180/np.pi), -15, 15) 
         # Move towards the rock slowly
