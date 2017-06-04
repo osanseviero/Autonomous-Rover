@@ -1,9 +1,9 @@
 [//]: # (Image References)
 [image_0]: ./misc/rover_image.jpg
-[main]: ./misc/example.jpg
-[main2]: ./misc/example2.jpg
-[main3]: ./misc/example3.jpg
-[main4]: ./misc/example4.jpg
+[main]: ./misc/example.png
+[main2]: ./misc/example2.png
+[main3]: ./misc/example3.png
+[main4]: ./misc/example4.png
 [image1]: ./misc/rover_image.jpg
 [image2]: ./calibration_images/example_grid1.jpg
 [image3]: ./calibration_images/example_rock1.jpg 
