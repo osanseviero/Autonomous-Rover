@@ -50,18 +50,26 @@ You're reading it!
 
 ### Notebook Analysis
 #### 1. Run the functions provided in the notebook on test images (first with the test data provided, next on data you have recorded). Add/modify functions to allow for color selection of obstacles and rock samples.
-The main part here is to add the functions to detect other obstacles and the rocks. For the obstacles, an inverse of the ground color threshold was enough. A threshold of the range of (100, 100, 20) and (255, 255, 30) was applied. This is enough to detect when there is a rock.
+The main part here is to add the functions to detect other obstacles and the rocks. For the obstacles, an inverse of the ground color threshold was enough. A threshold of the range of (100, 100, 20) and (255, 255, 30) was applied. This is enough to detect when there is a rock. This was implemented in two new functions (obstacle_thresh and rock_thresh). While the original color_thresh for terrain was checking the pixel values to be above the thresh, the obstacle thresh checks that the values are smaller. Both 'and' and 'or' conditionals work for this function, but 'and' was chosen because it kept a high fidelity since it's sure that the values are of an obstacle. In order to detect which ranges to use matplotlib was used using some example images.
 
 ![alt text][main]
 
 #### 1. Populate the `process_image()` function with the appropriate analysis steps to map pixels identifying navigable terrain, obstacles and rock samples into a worldmap.  Run `process_image()` on your test data using the `moviepy` functions provided to create video output of your result. 
-The process_image() function is in charge, as the name implies, of receiving an image and processing it. First, it makes the percept transform. To this warped image, the three different filters are applid (terrain, obstacles, rocks). This data helps, after converting to world coords, to color the map. With the simulator, you can record a run in training mode, and then use the notebook to analyze each image recorded in the run and make a video with it.
+The process_image() function is in charge, as the name implies, of receiving an image and processing it. First, it makes the percept transform. To this warped image, the three different filters are applid (terrain, obstacles, rocks). This data helps, after converting to world coords, to color the map. With the simulator, you can record a run in training mode, and then use the notebook to analyze each image recorded in the run and make a video with it. 
+
+The steps were the next ones:
+1. Define source and destination points for the perspective transform. 
+2. Apply the perspective using the cv2 library functions getPerspectiveTransform and warpPerspective. This gives a view from the top, but you can change to a custom destination point to improve it.
+3. Apply the three different color filters as explained in the previous section. This allows to differentiate between terrain, obstacles and samples to be gathered. This is then converted to rover coordinates (meaning that the rover position is the center bottom of the image):
+4. This coordinates are then converted to world coordinates. This is accomplished by rotating, translating, and finally scaling the image. This is done for each of the three thresholded images
+5. With this information, the world map can be updated and the mosaic image is populated.
+
 
 ![alt text][image2]
 ### Autonomous Navigation and Mapping
 
 #### 1. Fill in the `perception_step()` (at the bottom of the `perception.py` script) and `decision_step()` (in `decision.py`) functions in the autonomous mapping scripts and an explanation is provided in the writeup of how and why these functions were modified as they were.
-The `perception.py` script has a perception_step() function that works pretty much in the same way than in the notebook. Instead of interacting with a Databucket class, the function interacts with a Rover class. To increase the fidelity, there's a margin of 2 in the roll and pitch. This means that when the rover is rotating really fast, that data won't be mapped. This allowed to mantain a fidelity of almost 90%. 
+The `perception.py` script has a perception_step() function that works pretty much in the same way than in the notebook (explained in the previous section). Instead of interacting with a Databucket class, the function interacts with a Rover class. To increase the fidelity, there's a margin of 2 in the roll and pitch (angles bellow 2 or over 358. This means that when the rover is rotating really fast, that data won't be mapped. This allowed to mantain a fidelity of almost 90%. An important thing to note is that the Rover angles and distances both for navigable terrain and rocks is updated at the bottom. This information is used by the decision script to know where to move.
 
 The `decision.py` script works as the decision tree of the Rover. The first thing changed is that, when there are pixels activated with the rock filter, the rover will move in that direction. This causes some confusion when there are many rocks at the same time, but still works fine. To prevent the rover to go over the rock, it has a lower maximum velocity and the throttle is half. When it is close enough, it stops so it can pick the rock. Originally, this script only had a forward and a stop mode. I added a stuck mode. When the velocity is really low and there is still acceleration, it means that it's probably stuck with small obstacles. When this happens, the rover just steers a bit and tries to move again. Lastly, there is an open terrain in the right of the map which made the Rover move in circles since there was the same pixel density in the same direction. This was fixed by limiting the clip range in the forward mode. This decision tree allowed the Rover to map over 80% with high fidelity.
 
